@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { getLenis } from '../hooks/useLenis';
-import { useIsMobile } from '../hooks/use-mobile';
 import { navigationConfig } from '../config';
 
 export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const isMobile = useIsMobile();
+  const [isMobileView, setIsMobileView] = useState(false);
   const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -14,11 +13,18 @@ export default function Navigation() {
       setScrolled(window.scrollY > 50);
     };
 
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+
     handleScroll();
+    handleResize();
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -100,7 +106,7 @@ export default function Navigation() {
           )}
 
           {/* Desktop Links */}
-          {!isMobile && (
+          {!isMobileView && (
             <div
               style={{ display: 'flex', gap: '32px', alignItems: 'center' }}
             >
@@ -166,7 +172,7 @@ export default function Navigation() {
           )}
 
           {/* Mobile Hamburger */}
-          {isMobile && (
+          {isMobileView && (
             <button
             onClick={() => setMenuOpen(!menuOpen)}
             style={{
@@ -206,7 +212,7 @@ export default function Navigation() {
       </nav>
 
       {/* Mobile Backdrop */}
-      {isMobile && menuOpen && (
+      {isMobileView && menuOpen && (
         <div
           className="md:hidden"
           onClick={() => setMenuOpen(false)}
@@ -222,9 +228,10 @@ export default function Navigation() {
       )}
 
       {/* Mobile Side Menu */}
-      {isMobile && (
+      {isMobileView && (
         <div
-        style={{
+          className="md:hidden"
+          style={{
           position: 'fixed',
           left: 0,
           top: 0,
@@ -282,6 +289,7 @@ export default function Navigation() {
           Connect
         </a>
       </div>
+      )}
     </>
   );
 }
